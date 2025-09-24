@@ -1,13 +1,8 @@
-# Specifications API – Filter Request Example
 
-This document explains how to construct a filter request for the Specifications API using the given response data.  
-**The goal:** Filter results to only show ads for "جديد" (new) and "كامري" (Camry).
 
----
+## Example Specification Response
 
-## Example API Response
-
-Here is a sample of the specifications data you might receive from the API:
+Here is a sample of the specification data structure returned from the backend:
 
 ```json
 {
@@ -16,119 +11,106 @@ Here is a sample of the specifications data you might receive from the API:
   "message": null,
   "data": [
     {
-      "id": 92,
-      "name": "الماركه",
+      "id": 99,
+      "name": "صناعه الكنب",
       "values": [
         {
-          "id": 161,
-          "name": "تويوتا",
+          "id": 178,
+          "name": "اسيا",
           "spec": {
-            "specId": 93,
-            "specName": "تويوتا",
+            "specId": 100,
+            "specName": "اسيا",
             "specType": 3,
             "isRequired": false,
             "isMultiSelect": false,
             "values": [
-              { "id": 162, "name": "كامري" },
-              { "id": 163, "name": "لاند كروز" }
+              { "id": 179, "name": "السعودية" },
+              { "id": 180, "name": "الامارات" }
             ]
           }
         },
         {
-          "id": 164,
-          "name": "هوندا",
+          "id": 183,
+          "name": "افريقا",
           "spec": {
-            "specId": 94,
-            "specName": "هوندا",
+            "specId": 101,
+            "specName": "افريقا",
             "specType": 3,
             "isRequired": false,
             "isMultiSelect": false,
             "values": [
-              { "id": 165, "name": "اكورد" },
-              { "id": 166, "name": "اكورد ١" }
+              { "id": 184, "name": "مصر" },
+              { "id": 185, "name": "السودان" }
             ]
           }
         }
       ]
     },
     {
-      "id": 90,
-      "name": "الحالة",
+      "id": 97,
+      "name": "لون الكنب",
       "values": [
-        { "id": 153, "name": "جديد" },
-        { "id": 154, "name": "مستعمل " }
+        { "id": 170, "name": "ابيض" },
+        { "id": 172, "name": "احمر" }
       ]
     },
-    { "id": 87, "name": "عدد الكيلومترات", "values": null },
-    { "id": 82, "name": "سنة الصنع", "values": null }
-  ]
-}
-```
-
----
-
-## How to Build the Filter Request
-
-To filter for ads that are both:
-- **"جديد" (New)** (`id: 153`) from the specification `"الحالة"` (`id: 90`)
-- **"كامري" (Camry)** (`id: 162`) from the specification `"تويوتا"` (`specId: 93`)
-
-Your filter request should look like this:
-
-```json
-{
-  "specIds": [
     {
-      "specId": 93,
-      "specOptionsIds": [162]
-    },
-    {
-      "specId": 90,
-      "specOptionsIds": [153]
+      "id": 96,
+      "name": "نوع الكنب",
+      "values": [
+        { "id": 167, "name": "زاويه" },
+        { "id": 169, "name": "كامل" }
+      ]
     }
   ]
 }
 ```
 
-**Explanation:**
-- `"specId": 93` refers to the "تويوتا" brand, with option `"specOptionsIds": [162]` for "كامري".
-- `"specId": 90` refers to "الحالة", with option `"specOptionsIds": [153]` for "جديد".
+---
+
+## Example User Selection
+
+Suppose the user selects these options:
+- **صناعه الكنب**: 
+  - "اسيا" → "السعودية", "الامارات"
+  - "افريقا" → "مصر", "السودان"
+- **لون الكنب**: "ابيض", "احمر"
+- **نوع الكنب**: "زاويه", "كامل"
 
 ---
 
-## Example Full Request Body
+## API Submission Format
 
-If you want to include these filters in a larger request (e.g., searching for ads), your request might look like this:
+The selected options are mapped and sent to the backend as:
 
 ```json
 {
   "AdType": 1,
-  "MainCategoryId": 21,
-  "SubCategoryId": 52,
+  "MainCategoryId": 27,
+  "SubCategoryId": 58,
   "AdSorting": 1,
   "SpecIds": [
-    {
-      "SpecId": 93,
-      "SpecOptionsIds": [162]
-    },
-    {
-      "SpecId": 90,
-      "SpecOptionsIds": [153]
-    }
+    { "SpecId": 100, "SpecOptionsIds": [179, 180] },   // اسيا: السعودية, الامارات
+    { "SpecId": 101, "SpecOptionsIds": [184, 185] },   // افريقا: مصر, السودان
+    { "SpecId": 97,  "SpecOptionsIds": [170, 172] },   // لون الكنب: ابيض, احمر
+    { "SpecId": 96,  "SpecOptionsIds": [167, 169] }    // نوع الكنب: زاويه, كامل
   ]
 }
 ```
 
-> **Note:**  
-> - Make sure to use the correct key names and match the casing expected by your API (e.g., `SpecId` vs `specId`, `SpecOptionsIds` vs `specOptionsIds`).  
-> - The order of keys does not matter, but the structure must be correct.
+---
+
+## Mapping Table
+
+| Spec Name         | SpecId | Selected Options      | SpecOptionsIds     |
+|-------------------|--------|----------------------|--------------------|
+| اسيا             | 100    | السعودية, الامارات   | [179, 180]         |
+| افريقا           | 101    | مصر, السودان         | [184, 185]         |
+| لون الكنب        | 97     | ابيض, احمر           | [170, 172]         |
+| نوع الكنب        | 96     | زاويه, كامل          | [167, 169]         |
 
 ---
 
-## Summary
 
-- **To filter by "جديد" (new):** Use `"specId": 90`, `"specOptionsIds": [153]`
-- **To filter by "كامري" (Camry):** Use `"specId": 93`, `"specOptionsIds": [162]`
-- **Include these in your main request's `SpecIds` array.**
 
-If you have further questions or need to filter by other values, use the corresponding `specId` and option `id` from the response data.
+
